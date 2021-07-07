@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/project_n
+project_n.so
+project_n.dylib
+project_n.dll
+project_n.a
+project_n.lib
+project_n-test-*
+*.exe
+*.o
+*.obj
+*.lst

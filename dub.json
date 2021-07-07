@@ -1,0 +1,12 @@
+{
+	"authors": [
+		"KonstantIMP"
+	],
+	"copyright": "Copyright © 2021, KonstantIMP",
+	"description": "An application for signals modulation",
+	"license": "proprietary",
+	"name": "project_n",
+	"dependencies": {
+		"gtk_d:gtk" : "*"
+	}
+}
