@@ -19,8 +19,8 @@ class MainWindow : Window {
      * Params:
      *   uiBuilder = Builder object for UI getting
      */
-    public this(ref Builder uiBuilder) {
-        super((cast(Window)uiBuilder.getObject("main_win")).getWindowStruct());
-        show();
+    public this (ref Builder uiBuilder) {
+        super ((cast(Window)uiBuilder.getObject ("main_win")).getWindowStruct ());
+        show ();
     }
 }
