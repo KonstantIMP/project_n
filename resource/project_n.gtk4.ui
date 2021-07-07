@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="GtkAdjustment" id="freq_adj">
+    <property name="lower">1</property>
+    <property name="upper">1000000000000000</property>
+    <property name="value">100</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="info_adj">
+    <property name="lower">1</property>
+    <property name="upper">10000000000</property>
+    <property name="value">50</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="snr_adj">
+    <property name="lower">-100</property>
+    <property name="upper">100</property>
+    <property name="value">25</property>
+    <property name="step-increment">1</property>
+    <property name="page-increment">10</property>
+  </object>
+  <object class="GtkWindow" id="main_win">
+    <property name="title" translatable="yes">Project N</property>
+    <property name="child">
+      <object class="GtkBox" id="main_box">
+      <property name="margin-end">5</property>
+      <property name="margin-bottom">5</property>
+      <property name="margin-top">5</property>
+      <property name="margin-start">5</property>
+        <property name="spacing">5</property>
+        <child>
+          <object class="GtkBox" id="control_box">
+            <property name="orientation">vertical</property>
+            <property name="spacing">5</property>
+            <property name="hexpand">0</property>
+            <child>
+              <object class="GtkLabel" id="bits_msg">
+                <property name="label" translatable="yes">Битовая последовательность</property>
+                <property name="xalign">0</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkEntry" id="bits_en">
+                <property name="xalign">1</property>
+                <property name="input-purpose">digits</property>
+                <property name="input-hints">GTK_INPUT_HINT_NO_SPELLCHECK | GTK_INPUT_HINT_NO_EMOJI | GTK_INPUT_HINT_NONE</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="freq_msg">
+                <property name="label" translatable="yes">Несущая частота</property>
+                <property name="xalign">0</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="freq_spin">
+                <property name="adjustment">freq_adj</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="info_msg">
+                <property name="label" translatable="yes">Информативность</property>
+                <property name="xalign">0</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSpinButton" id="info_spin">
+                <property name="adjustment">info_adj</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="mod_msg">
+                <property name="label" translatable="yes">Вид модуляции</property>
+                <property name="xalign">0</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkComboBoxText" id="mod_cb">
+                <property name="active-id">0</property>
+                <items>
+                  <item id="0" translatable="yes">КИМ-ЧМ</item>
+                  <item id="1" translatable="yes">КИМ-ФМ</item>
+                </items>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="snr_msg">
+                <property name="label" translatable="yes">ОСШ</property>
+                <property name="xalign">0</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="snr_box">
+                <child>
+                  <object class="GtkSpinButton" id="snr_spin">
+                    <property name="hexpand">1</property>
+                    <property name="text" translatable="yes">25</property>
+                    <property name="adjustment">snr_adj</property>
+                    <property name="value">25</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="regen_btn">
+                    <property name="receives-default">1</property>
+                    <child>
+                      <object class="GtkImage" id="regen_img">
+                        <property name="icon-name">view-refresh-symbolic</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="error_box">
+                <child>
+                  <object class="GtkLabel" id="error_msg">
+                    <property name="hexpand">1</property>
+                    <property name="label" translatable="yes">Частоты ошибок</property>
+                    <property name="xalign">0</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="error_percent_msg">
+                    <property name="label" translatable="yes">0.0 %</property>
+                    <property name="xalign">1</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkBox" id="plot_box">
+            <property name="hexpand">1</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">5</property>
+            <property name="homogeneous">1</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+  </object>
+</interface>
