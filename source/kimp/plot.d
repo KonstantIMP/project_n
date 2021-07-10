@@ -100,7 +100,7 @@ class Plot : Overlay {
         if (plotSignal !is null) {
             double [] ys = plotSignal.createYS (duration);
             
-            for (ulong i = 0; i < min (ys.length, FRAMERATE); i += 250) {
+            for (ulong i = 0; i < min (ys.length, FRAMERATE); i += 100) {
                 if (ys[i] <= 0) {
                     yAmp = (h - 90) / 2;
                     xHeight = h / 2;
@@ -224,7 +224,7 @@ class Plot : Overlay {
         context.setLineWidth (2.0);
         context.setFontSize (10.0);
 
-        double step = (width - 60) / ceil (duration);
+        double step = (width - 60) / max (1, ceil (duration));
 
         for (ulong i = 0; i < max (1, ceil (duration)); i++) {
             context.moveTo (15 + step * (i + 1), height - 2.5);
@@ -248,7 +248,7 @@ class Plot : Overlay {
         context.setSourceRgba (0.0, 0.0, 0.0, 1.0);
         context.setFontSize (8.0);
 
-        context.moveTo (w - xName.length * 8 - 8, x + 10);
+        context.moveTo (w - xName.length * 3, x + 10);
         context.showText (xName);
 
         context.rotate (-PI_2);
