@@ -23,6 +23,7 @@
   </object>
   <object class="GtkWindow" id="main_win">
     <property name="title" translatable="yes">Project N</property>
+    <property name="default-width">600</property>
     <property name="child">
       <object class="GtkBox" id="main_box">
       <property name="margin-end">5</property>
