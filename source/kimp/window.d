@@ -36,11 +36,11 @@ import kimp.plot, kimp.signal;
      *   uiBuilder = Builder for getting ui elements
      */
     private void initPlots (ref Builder uiBuilder) {
-        test_plot = new Plot("Woof!", "t", "amp");
-        test_plot.setSignal (new SinSignal (1), 50);
+        video_plot = new Plot("Видеоимпульс", "t (сек)", "A");
+        video_plot.setSignal (new VideoPulse ("", 50), 0.0);
 
-        (cast(Box)uiBuilder.getObject("plot_box")).append(test_plot);
+        (cast(Box)uiBuilder.getObject("plot_box")).append(video_plot);
     }
 
-    private Plot test_plot;
+    private Plot video_plot;
 }

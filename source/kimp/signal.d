@@ -49,6 +49,53 @@ abstract class Signal {
 }
 
 /** 
+ * Video pulse signal (1 or 0)
+ */
+class VideoPulse : Signal {
+    /** 
+     * Create new VideoPulse signal
+     * Params:
+     *   bitSequnce = Bit sequence for display
+     *   informativeness = informativeness of the signal
+     */
+    public this (string bitSequnce, double informativeness) {
+        bits = bitSequnce; inf = informativeness;
+    }
+
+    override public double [] createYS (double duration) {
+        if (bits.length == 0 || duration <= 0.0) return new double[0];
+
+        double [] ys = new double[bits.length * cast(ulong)(FRAMERATE / inf)];
+
+        /** Zero check */
+        if (ys.length / bits.length < 3) {
+            inf = inf / 2; ys.destroy();
+            return createYS (duration);
+        }
+
+        for (ulong i = 0; i < bits.length; i++) {
+            double state = (bits[i] == '0' ? 0.0 : 1.0);
+            for (ulong j = 0; j < ys.length / bits.length; j++) {
+                ys[j + i * ys.length / bits.length] = state;
+            }
+        }
+
+        if (ys.length) ys[$ - 1] = 0.0;
+
+        return ys;
+    }
+
+    override public ulong calculateSignalWidth (double duration) {
+        return bits.length * 30;
+    }
+
+    /** Bit sequence for display */
+    protected string bits;
+    /** Informativeness of the signal */
+    protected double inf;
+}
+
+/** 
  * Sinusoidal signal
  */
 class SinSignal : Signal {
