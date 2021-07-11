@@ -10,6 +10,8 @@ import std.math.trigonometry : sin, cos;
 import std.math.rounding : round;
 import std.math.constants : PI;
 
+import std.algorithm : min;
+
 /** Default framerate for signal */
 immutable ulong FRAMERATE = 11_025;
 
@@ -86,7 +88,7 @@ class VideoPulse : Signal {
     }
 
     override public ulong calculateSignalWidth (double duration) {
-        return bits.length * 15;
+        return min(bits.length * 5, 16_384);
     }
 
     /** Bit sequence for display */
@@ -122,7 +124,7 @@ class SinSignal : Signal {
     }
 
     override public ulong calculateSignalWidth (double duration) {
-        return (cast(ulong)round(duration) + 1) * 30;
+        return min((cast(ulong)round(duration) + 1) * 30, 16_383);
     }
 
     /** Private sin parametrs */
