@@ -127,6 +127,7 @@ class Plot : Overlay {
             }
 
             context.stroke();
+            ys.destroy ();
         }
 
         plotDrawXAxis (context, w, xHeight);
