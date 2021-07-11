@@ -86,7 +86,7 @@ class VideoPulse : Signal {
     }
 
     override public ulong calculateSignalWidth (double duration) {
-        return bits.length * 30;
+        return bits.length * 15;
     }
 
     /** Bit sequence for display */
