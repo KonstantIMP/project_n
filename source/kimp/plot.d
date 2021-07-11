@@ -43,7 +43,7 @@ class Plot : Overlay {
      *   name = Plot's name
      */
     private void composeWidget (string name) {
-        DrawingArea plotArea = new DrawingArea();
+        plotArea = new DrawingArea();
         ScrolledWindow plotScrolledWindow = new ScrolledWindow();
         Label plotName = new Label("<span size='small' foreground='#000000'>" ~ name ~ "</span>");
 
@@ -58,20 +58,18 @@ class Plot : Overlay {
         plotName.setProperty("valign", GtkAlign.START);
 
         plotArea.setDrawFunc ((area, cairo, w, h, data) {
-            (cast(Plot)data).requestSize (new DrawingArea (area, true));
+            (cast(Plot)data).requestSize ();
             (cast(Plot)data).plotOnDraw (new Context (cairo), cast(ulong)w, cast(ulong)h);
         }, cast(void *)this, null);
     }
 
     /** 
      * Request required for signal size
-     * Params:
-     *   area = Drawing area for size changing
      */
-    private void requestSize (DrawingArea area) {
-        area.setSizeRequest (0, 0);
-        area.setSizeRequest (-1, -1);
-        area.setSizeRequest (60 + cast(int)plotSignal.calculateSignalWidth (duration), -1);
+    private void requestSize () {
+        plotArea.setSizeRequest (0, 0);
+        plotArea.setSizeRequest (-1, -1);
+        plotArea.setSizeRequest (60 + cast(int)plotSignal.calculateSignalWidth (duration), -1);
     }
 
     /** 
@@ -82,6 +80,14 @@ class Plot : Overlay {
      */
     public void setSignal (Signal signal, double dur) {
         plotSignal = signal; duration = dur;
+    }
+
+    /** 
+     * Redraw the plot
+     */
+    public void drawRequest () {
+        requestSize ();
+        plotArea.queueDraw ();
     }
 
     /** 
@@ -101,7 +107,7 @@ class Plot : Overlay {
             double [] ys = plotSignal.createYS (duration);
             
             for (ulong i = 0; i < min (ys.length, FRAMERATE); i += 100) {
-                if (ys[i] <= 0) {
+                if (ys[i] < 0) {
                     yAmp = (h - 90) / 2;
                     xHeight = h / 2;
                 }
@@ -265,4 +271,7 @@ class Plot : Overlay {
 
     /** Signal's duration */
     protected double duration;
+
+    /** Drawing area for plot */
+    private DrawingArea plotArea;
 }
