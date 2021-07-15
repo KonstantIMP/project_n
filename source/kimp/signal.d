@@ -12,6 +12,8 @@ import std.math.constants : PI;
 
 import std.algorithm : min;
 
+import kimp.modulation : ModulationType;
+
 /** Default framerate for signal */
 immutable ulong FRAMERATE = 11_025;
 
@@ -60,8 +62,8 @@ class VideoPulse : Signal {
      *   bitSequnce = Bit sequence for display
      *   informativeness = informativeness of the signal
      */
-    public this (string bitSequnce, double informativeness) {
-        bits = bitSequnce; inf = informativeness;
+    public this (string bitSequence, double informativeness) {
+        bits = bitSequence; inf = informativeness;
     }
 
     override public double [] createYS (double duration) {
@@ -129,4 +131,60 @@ class SinSignal : Signal {
 
     /** Private sin parametrs */
     protected double frequency, amplitude, offset;
+}
+
+/** 
+ * Signal with modulated radio data
+ */
+class RadioSignal : SinSignal {
+    /** 
+     * Create new Singal's object
+     * Params:
+     *   bitSequence = Bit sequnce for display
+     *   freq = Frequency of the base signal
+     *   inf = Informativeness of the signal
+     *   mod = Modulation type for data
+     */
+    public this (string bitSequence, double freq, double inf, ModulationType mod) {
+        bits = bitSequence; informativeness = inf; modulation = mod;
+        super (freq, 1.0, 0.0);
+    }
+
+    override public double [] createYS (double duration) {
+        double [] ys = new double[bits.length * cast(ulong)(FRAMERATE / informativeness)];
+
+        if (ys.length < bits.length * 30) {
+            informativeness = informativeness / 2; frequency = frequency / 2;
+            ys.destroy();
+            return createYS (duration);
+        }
+
+        int currentPhase = 1;
+        if (bits.length) if (bits[0] == '0') currentPhase = -1;
+
+        for (ulong i = 0; i < bits.length; i++) {
+            if(i) if (bits[i] != bits[i - 1]) currentPhase = -currentPhase;
+            for (ulong j = 0; j < ys.length / bits.length; j++) {
+                if (modulation == ModulationType.PHASE)
+                    ys [i * (ys.length / bits.length) + j] = sin(PI * 2 * frequency * (i * (ys.length / bits.length) + j) / FRAMERATE) * currentPhase;
+                else
+                    ys [i * (ys.length / bits.length) + j] = sin(PI * (bits[i] == '1' ? 2 : 1) * frequency * (i * (ys.length / bits.length) + j) / FRAMERATE);
+            }
+        }
+
+        if (ys.length) ys[$ - 1] = 0;
+
+        return ys;
+    }
+
+    override public ulong calculateSignalWidth (double duration) {
+        return min(bits.length * 60, 16_384);
+    }
+
+    /** Bit sequnece for display */
+    private string bits;
+    /** Informativeness of the signal */
+    private double informativeness;
+    /** Modulation type for the signal */
+    private ModulationType modulation;
 }

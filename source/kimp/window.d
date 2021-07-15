@@ -5,13 +5,13 @@
 module kimp.window;
 
 /** Import GtkD widgets */
-import gtk.Window, gtk.Box, gtk.EditableIF, gtk.Entry, gtk.SpinButton;
+import gtk.Window, gtk.Box, gtk.EditableIF, gtk.Entry, gtk.SpinButton, gtk.ComboBox;
 
 /** Import GtkD tools */
 import gtk.Builder : Builder;
 
 /** Import ploting lib and signals */
-import kimp.plot, kimp.signal;
+import kimp.plot, kimp.signal, kimp.modulation;
 
 /**
  * Main apps' window
@@ -41,7 +41,11 @@ import kimp.plot, kimp.signal;
         video_plot = new Plot("Видеоимпульс", "t (сек)", "A");
         video_plot.setSignal (new VideoPulse ("", 50), 0.0);
 
+        radio_plot = new Plot("Радиосигнал", "t (сек.)", "A");
+        radio_plot.setSignal (new RadioSignal ("", 100, 50, ModulationType.FREQUENCY), 0.0);
+
         (cast(Box)uiBuilder.getObject("plot_box")).append(video_plot);
+        (cast(Box)uiBuilder.getObject("plot_box")).append(radio_plot);
     }
 
     /** 
@@ -67,9 +71,13 @@ import kimp.plot, kimp.signal;
         double snr = (cast(SpinButton)localBuilder.getObject ("snr_spin")).getValue ();
         double freq = (cast(SpinButton)localBuilder.getObject ("freq_spin")).getValue ();
     
+        ModulationType mod = cast(ModulationType)(cast(ComboBox)localBuilder.getObject ("mod_cb")).getActive ();
+
         video_plot.setSignal (new VideoPulse (bits, info), bits.length / info);
+        radio_plot.setSignal (new RadioSignal (bits, freq, info, mod), bits.length / info);
 
         video_plot.drawRequest ();
+        radio_plot.drawRequest ();
     }
 
     /** 
@@ -97,4 +105,5 @@ import kimp.plot, kimp.signal;
 
     /** Plots for display */
     private Plot video_plot;
+    private Plot radio_plot;
 }
