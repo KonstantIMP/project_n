@@ -5,7 +5,7 @@
 module kimp.window;
 
 /** Import GtkD widgets */
-import gtk.Window, gtk.Box, gtk.EditableIF, gtk.Entry, gtk.SpinButton, gtk.ComboBox;
+import gtk.Window, gtk.Box, gtk.EditableIF, gtk.Entry, gtk.SpinButton, gtk.ComboBox, gtk.Button;
 
 /** Import GtkD tools */
 import gtk.Builder : Builder;
@@ -63,6 +63,10 @@ import kimp.plot, kimp.signal, kimp.modulation;
         (cast(SpinButton)uiBuilder.getObject("info_spin")).addOnValueChanged( (spin) {updatePlots ();});
         (cast(SpinButton)uiBuilder.getObject("snr_spin")).addOnValueChanged( (spin) {updatePlots ();});
         (cast(SpinButton)uiBuilder.getObject("freq_spin")).addOnValueChanged( (spin) {updatePlots ();});
+
+        (cast(ComboBox)uiBuilder.getObject("mod_cb")).addOnChanged( (spin) {updatePlots ();});
+
+        (cast(Button)uiBuilder.getObject("regen_btn")).addOnClicked ( (btn) {updatePlots ();});
     }
 
     /** 
