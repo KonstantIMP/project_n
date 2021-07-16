@@ -38,14 +38,18 @@ import kimp.plot, kimp.signal, kimp.modulation;
      *   uiBuilder = Builder for getting ui elements
      */
     private void initPlots (ref Builder uiBuilder) {
-        video_plot = new Plot("Видеоимпульс", "t (сек)", "A");
-        video_plot.setSignal (new VideoPulse ("", 50), 0.0);
+        videoPlot = new Plot("Видеоимпульс", "t (сек)", "A");
+        videoPlot.setSignal (new VideoPulse ("", 50), 0.0);
 
-        radio_plot = new Plot("Радиосигнал", "t (сек.)", "A");
-        radio_plot.setSignal (new RadioSignal ("", 100, 50, ModulationType.FREQUENCY), 0.0);
+        radioPlot = new Plot("Радиосигнал", "t (сек.)", "A");
+        radioPlot.setSignal (new RadioPulse ("", 100, 50, ModulationType.FREQUENCY), 0.0);
 
-        (cast(Box)uiBuilder.getObject("plot_box")).append(video_plot);
-        (cast(Box)uiBuilder.getObject("plot_box")).append(radio_plot);
+        noisePlot = new Plot("Полученный сигнал", "t (сек.)", "A");
+        noisePlot.setSignal (new NoisedRadioPulse ("", 100, 50, 25, ModulationType.FREQUENCY), 0.0);
+
+        (cast(Box)uiBuilder.getObject("plot_box")).append(videoPlot);
+        (cast(Box)uiBuilder.getObject("plot_box")).append(radioPlot);
+        (cast(Box)uiBuilder.getObject("plot_box")).append(noisePlot);
     }
 
     /** 
@@ -73,11 +77,13 @@ import kimp.plot, kimp.signal, kimp.modulation;
     
         ModulationType mod = cast(ModulationType)(cast(ComboBox)localBuilder.getObject ("mod_cb")).getActive ();
 
-        video_plot.setSignal (new VideoPulse (bits, info), bits.length / info);
-        radio_plot.setSignal (new RadioSignal (bits, freq, info, mod), bits.length / info);
+        videoPlot.setSignal (new VideoPulse (bits, info), bits.length / info);
+        radioPlot.setSignal (new RadioPulse (bits, freq, info, mod), bits.length / info);
+        noisePlot.setSignal (new NoisedRadioPulse (bits, freq, info, snr, mod), bits.length / info);
 
-        video_plot.drawRequest ();
-        radio_plot.drawRequest ();
+        videoPlot.drawRequest ();
+        radioPlot.drawRequest ();
+        noisePlot.drawRequest ();
     }
 
     /** 
@@ -104,6 +110,7 @@ import kimp.plot, kimp.signal, kimp.modulation;
     private Builder localBuilder;
 
     /** Plots for display */
-    private Plot video_plot;
-    private Plot radio_plot;
+    private Plot videoPlot;
+    private Plot radioPlot;
+    private Plot noisePlot;
 }

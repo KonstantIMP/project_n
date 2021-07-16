@@ -7,8 +7,12 @@ module kimp.signal;
 import std.exception;
 
 import std.math.trigonometry : sin, cos;
+import std.math.exponential : pow, log;
+import std.math.algebraic : sqrt;
 import std.math.rounding : round;
 import std.math.constants : PI;
+
+import std.random : uniform;
 
 import std.algorithm : min;
 
@@ -136,7 +140,7 @@ class SinSignal : Signal {
 /** 
  * Signal with modulated radio data
  */
-class RadioSignal : SinSignal {
+class RadioPulse : SinSignal {
     /** 
      * Create new Singal's object
      * Params:
@@ -182,9 +186,50 @@ class RadioSignal : SinSignal {
     }
 
     /** Bit sequnece for display */
-    private string bits;
+    protected string bits;
     /** Informativeness of the signal */
-    private double informativeness;
+    protected double informativeness;
     /** Modulation type for the signal */
-    private ModulationType modulation;
+    protected ModulationType modulation;
+}
+
+/** 
+ * Radio pulse with noise
+ */
+class NoisedRadioPulse : RadioPulse {
+    /** 
+     * Create new Singal's object
+     * Params:
+     *   bitSequence = Bit sequnce for display
+     *   freq = Frequency of the base signal
+     *   inf = Informativeness of the signal
+     *   noise = snr for the signal
+     *   mod = Modulation type for data
+     */
+    public this (string bitSequence, double freq, double inf, double noise, ModulationType mod) {
+        super (bitSequence, freq, inf, mod);
+        snr = noise;
+    }
+
+    override public double [] createYS (double duration) {
+        double [] ys = super.createYS (duration);
+
+        /** Calculate noise's power */
+        double noiseAmp = 2.0 / (pow(10.0, (snr / 20.0)));
+
+        /** Variables for Box-Muller transform */
+        double r = 0.0, q = 0.0;
+
+        for (ulong i = 0; i < ys.length; i++) {
+            r = uniform!"(]"(0.0f, 1.0f); q = uniform!"(]"(0.0f, 1.0f);
+            ys[i] = ys[i] + noiseAmp * (cos(PI * 2 * q) * sqrt((-2) * log(r)));
+        }
+
+        if (ys.length) ys[$ - 1] = 0;
+
+        return ys;
+    }
+
+    /** SNR for the signal */
+    protected double snr;
 }
