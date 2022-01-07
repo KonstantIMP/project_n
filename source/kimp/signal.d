@@ -13,8 +13,9 @@ import std.math.rounding : round;
 import std.math.constants : PI;
 
 import std.random : uniform;
-
 import std.algorithm : min;
+
+import std.signals;
 
 import kimp.modulation : ModulationType;
 
@@ -232,4 +233,58 @@ class NoisedRadioPulse : RadioPulse {
 
     /** SNR for the signal */
     protected double snr;
+}
+
+/** 
+ * Pulse of extracted usefull data
+ */
+class OutputVideoPulse : NoisedRadioPulse {
+    /** 
+     * Create new Singal's object
+     * Params:
+     *   bitSequence = Bit sequnce for display
+     *   freq = Frequency of the base signal
+     *   inf = Informativeness of the signal
+     *   noise = snr for the signal
+     *   mod = Modulation type for data
+     */
+    public this (string bitSequence, double freq, double inf, double noise, ModulationType mod) {
+        super (bitSequence, freq, inf, noise, mod);
+    }
+
+    mixin std.signals.Signal!(string);
+
+    override public double [] createYS (double duration) {
+        import std.algorithm.sorting : sort;
+        import std.math : abs;       
+
+        double [] ys = super.createYS(duration);
+        for (ulong i = 0; i < ys.length; i++) {
+            ys[i] += amplitude * sin (PI * 2 * frequency * i / FRAMERATE + offset);
+        }
+    
+        string result = "";
+
+        if (modulation == ModulationType.FREQUENCY) {
+            
+        } else {
+            for (int i = 0; i < bits.length; i++) {
+                double [] unit = ys[i * (ys.length / bits.length) .. (i + 1) * (ys.length / bits.length)]; unit.sort();
+                unit = unit[cast(ulong)(unit.length * 0.1) .. $ - cast(ulong)(unit.length * 0.1)];
+                if (abs(unit[$ - 1]) + abs(unit[0]) < 0.55) result ~= "0";
+                else result ~= "1";
+            }
+        }
+
+        emit(result);
+
+        VideoPulse vp = new VideoPulse(result, informativeness);
+        return vp.createYS(duration);
+    }
+
+    override public ulong calculateSignalWidth (double duration) {
+        return min(bits.length * 5, 16_384);
+    }
+
+    protected string result = "";
 }

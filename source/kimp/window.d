@@ -13,6 +13,8 @@ import gtk.Builder : Builder;
 /** Import ploting lib and signals */
 import kimp.plot, kimp.signal, kimp.modulation;
 
+import std.conv : to;
+
 /**
  * Main apps' window
  */
@@ -47,9 +49,13 @@ import kimp.plot, kimp.signal, kimp.modulation;
         noisePlot = new Plot("Полученный сигнал", "t (сек.)", "A");
         noisePlot.setSignal (new NoisedRadioPulse ("", 100, 50, 25, ModulationType.FREQUENCY), 0.0);
 
+        resultPlot = new Plot("Выделенная нагрузка", "t (сек.)", "А");
+        resultPlot.setSignal(new OutputVideoPulse ("", 100, 50, 25, ModulationType.FREQUENCY), 0.0);
+
         (cast(Box)uiBuilder.getObject("plot_box")).append(videoPlot);
         (cast(Box)uiBuilder.getObject("plot_box")).append(radioPlot);
         (cast(Box)uiBuilder.getObject("plot_box")).append(noisePlot);
+        (cast(Box)uiBuilder.getObject("plot_box")).append(resultPlot);
     }
 
     /** 
@@ -85,9 +91,30 @@ import kimp.plot, kimp.signal, kimp.modulation;
         radioPlot.setSignal (new RadioPulse (bits, freq, info, mod), bits.length / info);
         noisePlot.setSignal (new NoisedRadioPulse (bits, freq, info, snr, mod), bits.length / info);
 
+        auto ovp = new OutputVideoPulse (bits, freq, info, snr, mod);
+        ovp.connect(&this.calculateDiff);
+        resultPlot.setSignal (ovp, bits.length / info);
+
         videoPlot.drawRequest ();
         radioPlot.drawRequest ();
         noisePlot.drawRequest ();
+        resultPlot.drawRequest ();
+    }
+
+    protected void calculateDiff(string res) @trusted {
+        import gtk.Label, std.algorithm.comparison : min, max;
+
+        Label percenLabel = cast(Label)localBuilder.getObject("error_percent_msg");
+        string bits = (cast(Entry)localBuilder.getObject ("bits_en")).getText ();
+    
+        ulong ok = 0;
+
+        for (ulong i = 0; i < min(bits.length, res.length); i++) {
+            if (res[i] == bits[i]) ok++;
+        }
+
+        if (bits.length == 0) percenLabel.setText("0.0 %");
+        else percenLabel.setText(to!string(100 * cast(double)(bits.length - ok) / cast(double)bits.length) ~ " %");
     }
 
     /** 
@@ -117,4 +144,5 @@ import kimp.plot, kimp.signal, kimp.modulation;
     private Plot videoPlot;
     private Plot radioPlot;
     private Plot noisePlot;
+    private Plot resultPlot;
 }
