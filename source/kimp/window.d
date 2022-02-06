@@ -31,6 +31,7 @@ import std.conv : to;
         connectSignals (uiBuilder);
 
         localBuilder = uiBuilder;
+        (cast(ComboBox)uiBuilder.getObject("mod_cb")).setActive(0);
         show ();
     }
 
@@ -103,6 +104,8 @@ import std.conv : to;
 
     protected void calculateDiff(string res) @trusted {
         import gtk.Label, std.algorithm.comparison : min, max;
+
+        if (res.length == 0) return;
 
         Label percenLabel = cast(Label)localBuilder.getObject("error_percent_msg");
         string bits = (cast(Entry)localBuilder.getObject ("bits_en")).getText ();

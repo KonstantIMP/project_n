@@ -255,25 +255,41 @@ class OutputVideoPulse : NoisedRadioPulse {
     mixin std.signals.Signal!(string);
 
     override public double [] createYS (double duration) {
-        import std.algorithm.sorting : sort;
-        import std.math : abs;       
+        import std.math.exponential : log2, pow;
+        import std.algorithm.iteration :map;
+        import std.math.rounding : ceil;
+        import std.complex : Complex;
+        import std.math.trigonometry : atan;
+        import std.numeric : fft;
 
         double [] ys = super.createYS(duration);
-        for (ulong i = 0; i < ys.length; i++) {
-            ys[i] += amplitude * sin (PI * 2 * frequency * i / FRAMERATE + offset);
-        }
-    
+        if (bits.length == 0) return [];
+
+        long bit_length = ys.length / bits.length;
         string result = "";
 
-        if (modulation == ModulationType.FREQUENCY) {
-            
-        } else {
-            for (int i = 0; i < bits.length; i++) {
-                double [] unit = ys[i * (ys.length / bits.length) .. (i + 1) * (ys.length / bits.length)]; unit.sort();
-                unit = unit[cast(ulong)(unit.length * 0.1) .. $ - cast(ulong)(unit.length * 0.1)];
-                if (abs(unit[$ - 1]) + abs(unit[0]) < 0.55) result ~= "0";
-                else result ~= "1";
+        for (long i = 0; i < bits.length; i++) {
+            double [] bit = 
+                new double[cast(ulong)(pow(2, ceil(log2(bit_length)))) - bit_length] ~ ys[i * bit_length .. (i + 1) * bit_length];
+            for (long j = 0; j < cast(ulong)(pow(2, ceil(log2(bit_length)))) - bit_length; j++) {
+                bit[j] = 0.0;
             }
+
+            Complex!double [] fft_bit = fft(bit);
+
+            double fft_sum = 0.0;
+
+            for (long j = 0; j < fft_bit.length; j++) {
+                if (modulation == ModulationType.FREQUENCY) {
+                    fft_sum += sqrt(fft_bit[j].re * fft_bit[j].re + fft_bit[j].im * fft_bit[j].im);
+                }
+                else {
+                    fft_sum += atan(fft_bit[j].re / fft_bit[j].im);
+                }
+            }
+
+            import std.stdio : writeln;
+            writeln(bits[i], ' ', fft_sum);
         }
 
         emit(result);

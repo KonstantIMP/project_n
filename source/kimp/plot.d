@@ -35,6 +35,7 @@ class Plot : Overlay {
         xName = x; yName = y;
         plotSignal = null;
         duration = 0.0;
+        ys = new double[0];
     }
 
     /** 
@@ -86,8 +87,27 @@ class Plot : Overlay {
      * Redraw the plot
      */
     public void drawRequest () {
-        requestSize ();
-        plotArea.queueDraw ();
+        import glib.Timeout, std.parallelism : task;
+
+        auto ys_task = task!updateYS(plotSignal, duration);
+        ys_task.executeInNewThread();
+
+        Timeout check;
+        check = new Timeout(250, () {
+            if (ys_task.done) {
+                ys = ys_task.yieldForce();
+                
+                requestSize ();
+                plotArea.queueDraw ();
+
+                check.stop();
+            }
+            return true;
+        });
+    }
+
+    protected static double [] updateYS(Signal sig, double dur) @trusted {
+        return sig.createYS (dur);
     }
 
     /** 
@@ -103,9 +123,7 @@ class Plot : Overlay {
         ulong xHeight = h - 15;
         ulong yAmp = h - 45;
 
-        if (plotSignal !is null) {
-            double [] ys = plotSignal.createYS (duration);
-            
+        if (plotSignal !is null) {            
             for (ulong i = 0; i < min (ys.length, FRAMERATE); i += 100) {
                 if (ys[i] < 0) {
                     yAmp = (h - 90) / 2;
@@ -127,7 +145,6 @@ class Plot : Overlay {
             }
 
             context.stroke();
-            ys.destroy ();
         }
 
         plotDrawXAxis (context, w, xHeight);
@@ -275,4 +292,7 @@ class Plot : Overlay {
 
     /** Drawing area for plot */
     private DrawingArea plotArea;
+
+    /** YS for display */
+    private double [] ys;
 }
